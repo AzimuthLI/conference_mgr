@@ -1,55 +1,36 @@
-from flask import (Blueprint, flash, g, redirect, jsonify, request, session, url_for)
+import functools, json
+
+from flask import (Blueprint, flash, g, jsonify, redirect, request, session,
+                   url_for, Response)
 from werkzeug.security import check_password_hash, generate_password_hash
-import functools
+
 from app.models import User_admin
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
-
-# @bp.route('/register', methods=('GET', 'POST'))
-# def register():
-#     if request.method == 'POST':
-#         username = request.form['username']
-#         password = request.form['password']
-#         error = None
-
-#         if not username:
-#             error = 'Username is required.'
-#         elif not password:
-#             error = 'Password is required.'
-#         elif User_admin.query.filter_by(username=username).first() is not None:
-#             error = 'User {} is already registered.'.format(username)
-
-#         if error is None:
-#             user = User_admin(username, generate_password_hash(password))
-#             user.save()
-#             return jsonify({'register': True, 'user': username, 'error_msg': error})
-#         else:
-#             return jsonify({'register': False, 'user': username, 'error_msg': error})
-#         flash(error)
 
 @bp.route('/login', methods=('GET', 'POST'))
 def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
+        
         error = None
         user = User_admin.query.filter_by(username = username).first()
-
         if user is None:
             error = 'Incorrect username.'
-        elif not check_password_hash(user['password'], password):
+        elif not check_password_hash(user.password, password):
             error = 'Incorrect password.'
 
         if error is None:
             session.clear()
-            session['user_id'] = user['id']
-            response = jsonify({'login': True, 'user': username, 'error_msg': error})
-            return response
+            session['user_id'] = user.id
+            login_status = {'login': 'true', 'user': username}
         else:
-            response = jsonify({'login': False, 'error_msg': error})
-            response.status_code = 201
+            login_status = {'login': 'false', 'error_msg': error}
             flash(error)
-            return response
+
+    # print(response)
+    return Response(json.dumps(login_status), mimetype=u'application/json')
 
 @bp.before_app_request
 def load_logged_in_user():

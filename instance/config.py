@@ -1,17 +1,17 @@
 import os
 
+# os.environ['FLASK_APP'] = 'run.py'
+# os.environ['APP_SETTINGS'] = 'development'
+# os.environ['SECRET'] = 'dev'
+# os.environ['DATABASE_URL'] = 'postgresql://localhost/flask_api' 
+
 class Config(object):
     """Parent configuration class."""
-    
-    os.environ['FLASK_APP'] = 'run.py'
-    os.environ['APP_SETTINGS'] = 'development'
-    os.environ['SECRET'] = 'dev'
-    os.environ['DATABASE_URL'] = 'postgresql://localhost/flask_api'
-
     DEBUG = False
     CSRF_ENABLED = True
     SECRET = os.getenv('SECRET')
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
+    SESSION_TYPE = 'filesystem'
 
 class DevelopmentConfig(Config):
     """Configurations for Development."""
